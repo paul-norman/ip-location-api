@@ -47,7 +47,7 @@ Download the most suitable build for your system from the `releases`. This will 
 
 ```Shell
 sudo mkdir -p /var/www/ip-location-api
-sudo wget -q -O /var/www/ip-location-api/ip-location-api https://github.com/paul-norman/ip-location-api/releases/download/v1.0.0/ip-location-api-linux-x64.bin 
+sudo wget -q -O /var/www/ip-location-api/ip-location-api https://github.com/paul-norman/ip-location-api/releases/latest/download/ip-location-api-linux-x64.bin 
 sudo chmod +x /var/www/ip-location-api/ip-location-api
 ``` 
 
@@ -63,6 +63,8 @@ Start the system and wait for it to update *(or create a [service](#install-as-a
 cd /var/www/ip-location-api
 sudo ./ip-location-api
 ```
+
+**It's probably a good idea to start the system up manually like this on the first run** because it will allow you to see the data loading progress / any problems. After that, using a service is a good idea.
 
 ## Configuration
 

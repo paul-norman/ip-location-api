@@ -1,9 +1,13 @@
 package main
 
 import (
+	"embed"
 	"net"
 	"os"
 )
+
+//go:embed structure/*.sql
+var dbStructures embed.FS
 
 func dbConnect() {
 	switch os.Getenv("DB_TYPE") {

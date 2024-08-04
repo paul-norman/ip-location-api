@@ -351,7 +351,8 @@ func sqliteSaveCities(cities []IpCity) {
 }
 
 func sqliteFile(sqlPath string) {
-	sqlBytes, err := os.ReadFile(sqlPath)
+	sqlBytes, err := dbStructures.ReadFile(sqlPath)
+	//sqlBytes, err := os.ReadFile(sqlPath)
 	if err != nil {
 		panic(err)
 	}

@@ -315,7 +315,8 @@ func fixPostgresVars(sqlString string) string {
 }
 
 func postgresFile(sqlPath string) {
-	sqlBytes, err := os.ReadFile(sqlPath)
+	sqlBytes, err := dbStructures.ReadFile(sqlPath)
+	//sqlBytes, err := os.ReadFile(sqlPath)
 	if err != nil {
 		panic(err)
 	}
