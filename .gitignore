@@ -1,0 +1,28 @@
+# Logs
+logs
+*.log
+
+# Env file
+.env
+
+# mac files
+.DS_Store
+
+# vim swap files
+*.swp
+
+# webstorm
+.idea
+
+# vscode
+.vscode
+*code-workspace
+
+# SQLite files
+*.db
+
+# The downloads directory
+downloads
+
+# The builds directory
+builds
