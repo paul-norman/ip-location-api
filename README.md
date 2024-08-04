@@ -61,7 +61,7 @@ Start the system and wait for it to update *(or create a [service](#install-as-a
 
 ```Shell
 cd /var/www/ip-location-api
-./ip-location-api
+sudo ./ip-location-api
 ```
 
 ## Configuration
@@ -83,7 +83,7 @@ UPDATE_TIME=01:30
 
 If you wish to expose the system without a reverse proxy, you may wish to update `SERVER_HOST` to `0.0.0.0`.
 
-`API_KEY` allows a very basic protection of the system to be applied, a header named `API_KEY` with a matching value must be passed if this variable is populated. If left blank, the API is open.
+`API_KEY` allows a very basic protection of the system to be applied, a header named `API-KEY` *(hyphen not underscore!)* with a matching value must be passed if this variable is populated. If left blank, the API is open.
 
 `COUNTRY`, `CITY` and `ASN` are the databases that will be loaded. **If you don't need cities or ASNs, just leave them blank.** The values / names used should mirror the directory values found in the [ip-location-db](https://github.com/sapics/ip-location-db) project:
 
@@ -118,6 +118,8 @@ The MMDB adaption doesn't need any initialisation, it just needs to be told to u
 ```Dotenv
 DB_TYPE=mmdb
 ```
+
+**N.B. If you choose MMDB, you will need enough RAM to read the entirety of each file into memory *(briefly)* before it is saved to disk. MaxMind don't have a partial method to write their files.** For city files, this can be quite a lot *(more than my favourite AWS `t4g.small` have spare if there's other programs running!)*.
 
 ### PostgreSQL
 
@@ -214,15 +216,16 @@ server {
 	include		ssl.d/yoursite.com.conf;
 	
 	location / {	
-		proxy_http_version	1.1;
-		proxy_cache_bypass	$http_upgrade;
-		proxy_set_header	Upgrade $http_upgrade;
-		proxy_set_header	Connection 'upgrade';
-		proxy_set_header	Host $host;
-		proxy_set_header	X-Real-IP $remote_addr;
-		proxy_set_header	X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header	X-Forwarded-Proto $scheme;
-		proxy_pass		http://127.0.0.1:8081/;
+		proxy_http_version		1.1;
+		proxy_cache_bypass		$http_upgrade;
+		proxy_set_header		Upgrade $http_upgrade;
+		proxy_set_header		Connection 'upgrade';
+		proxy_set_header		Host $host;
+		proxy_set_header		X-Real-IP $remote_addr;
+		proxy_set_header		X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header		X-Forwarded-Proto $scheme;
+		proxy_pass_request_headers	on;
+		proxy_pass			http://127.0.0.1:8081/;
 	}
 }
 ```

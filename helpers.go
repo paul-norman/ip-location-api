@@ -318,7 +318,7 @@ func randomNumber(min, max int) int {
 
 func validApiKey(request *http.Request, enforceKey bool) bool {
 	if len(os.Getenv("API_KEY")) > 0 || enforceKey {
-		if len(os.Getenv("API_KEY")) == 0 || request.Header.Get("API_KEY") != os.Getenv("API_KEY") {
+		if len(os.Getenv("API_KEY")) == 0 || request.Header.Get("API-KEY") != os.Getenv("API_KEY") {
 			return false
 		}
 	}

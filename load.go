@@ -12,23 +12,23 @@ func loadCheckInitialised() (bool, []string) {
 	var missing []string
 
 	if hasCountryDatabase() {
-		initialised = dbInitialised("COUNTRY")
-		if !initialised {
-			missing = append(missing, "COUNTRY")
+		if !dbInitialised("COUNTRY") {
+			missing		= append(missing, "COUNTRY")
+			initialised	= false
 		}
 	}
 
-	if initialised && hasASNDatabase() {
-		initialised = dbInitialised("ASN")
-		if !initialised {
-			missing = append(missing, "ASN")
+	if hasASNDatabase() {
+		if !dbInitialised("ASN") {
+			missing		= append(missing, "ASN")
+			initialised	= false
 		}
 	}
 
-	if initialised && hasCityDatabase() {
-		initialised = dbInitialised("CITY")
-		if !initialised {
-			missing = append(missing, "CITY")
+	if hasCityDatabase() {
+		if !dbInitialised("CITY") {
+			missing		= append(missing, "CITY")
+			initialised	= false
 		}
 	}
 
