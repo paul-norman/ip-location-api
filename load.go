@@ -69,7 +69,7 @@ func loadCities(dataToLoad DataToLoad) {
 
 		cities = append(cities, IpCity{ record[0], record[1], record[2], record[3], record[4], record[5], record[6], lat, lon, record[9], dataToLoad.Version, version })
 
-		if len(cities) == 1000 {
+		if len(cities) == 100 {
 			count += len(cities);
 			fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
 			fmt.Printf("Saved: %d entries\n", count)
@@ -110,7 +110,7 @@ func loadASNs(dataToLoad DataToLoad) {
 		asn, _ := strconv.Atoi(record[2])
 		ASNs = append(ASNs, IpASN{ record[0], record[1], asn, record[3], dataToLoad.Version, version })
 
-		if len(ASNs) == 1000 {
+		if len(ASNs) == 100 {
 			count += len(ASNs);
 			fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
 			fmt.Printf("Saved: %d entries\n", count)
@@ -150,7 +150,7 @@ func loadCountries(dataToLoad DataToLoad) {
 		}
 		countries = append(countries, IpCountry{ record[0], record[1], record[2], dataToLoad.Version, version })
 
-		if len(countries) == 1000 {
+		if len(countries) == 100 {
 			count += len(countries);
 			fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
 			fmt.Printf("Saved: %d entries\n", count)
