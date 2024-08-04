@@ -47,26 +47,17 @@ Download the most suitable build for your system from the `releases`. This will 
 
 ```Shell
 sudo mkdir -p /var/www/ip-location-api
-sudo wget -q -O /var/www/ip-location-api/ip-location-api https://github.com/paul-norman/ip-location-api/releases/download/1.0.0/ip-location-api-linux-x64.bin 
+sudo wget -q -O /var/www/ip-location-api/ip-location-api https://github.com/paul-norman/ip-location-api/releases/download/v1.0.0/ip-location-api-linux-x64.bin 
 sudo chmod +x /var/www/ip-location-api/ip-location-api
 ``` 
 
-Either make this folder writable for the user that will run the system, or create a downloads folder and make that writable:
-
-```Shell
-sudo mkdir /var/www/ip-location-api/downloads
-sudo chmod 0777 /var/www/ip-location-api/downloads
-```
-
-The system will download updates into this folder and process them.
-
-Create a `.env` file in the main directory containing your required settings *(see next section)*:
+Create a `.env` file in the main directory containing your required settings *(see [Configuration](#configuration))*:
 
 ```Shell
 sudo nano /var/www/ip-location-api/.env
 ```
 
-Start the system and wait for it to update:
+Start the system and wait for it to update *(or create a [service](#install-as-a-service))*:
 
 ```Shell
 cd /var/www/ip-location-api
@@ -179,7 +170,7 @@ sudo nano /etc/systemd/system/ip-location-api.service
 
 ```
 [Unit]
-Description=Vikunja
+Description=IP-Location-API
 After=syslog.target
 After=network.target
 # Depending on how you configured the system, you may want to uncomment these:
@@ -201,6 +192,7 @@ WantedBy=multi-user.target
 
 ```Shell
 sudo systemctl enable ip-location-api
+sudo systemctl start ip-location-api
 ```
 
 ## Updates
@@ -217,7 +209,7 @@ Any reverse proxy can handle this task, but for [Nginx](https://nginx.org/en/) t
 server {
 	listen		443 ssl http2;
 	listen		[::]:443 ssl http2;
-	server_name	location-api.yoursite.com;
+	server_name	ip-location-api.yoursite.com;
 
 	include		ssl.d/yoursite.com.conf;
 	
@@ -233,6 +225,11 @@ server {
 		proxy_pass		http://127.0.0.1:8081/;
 	}
 }
+```
+
+```Shell
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
 ## Benchmarks
