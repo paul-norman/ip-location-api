@@ -82,3 +82,7 @@ test: update
 update:
 	go get -u
 	go mod tidy
+
+# Docker commands
+dockerbuild:
+	docker build -t ip-location-api .
