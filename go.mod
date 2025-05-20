@@ -1,6 +1,6 @@
 module github.com/paul-norman/ip_api
 
-go 1.22.5
+go 1.23.9
 
 require (
 	github.com/glebarez/go-sqlite v1.22.0
