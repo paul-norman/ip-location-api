@@ -35,7 +35,7 @@ USER appuser
 
 # Create separate stages for each architecture
 FROM runtime AS amd64
-COPY --from=builder /app/builds/ip-location-api-linux-amd64.bin /app/ip-location-api
+COPY --from=builder /app/builds/ip-location-api-linux-x64.bin /app/ip-location-api
 
 FROM runtime AS arm64
 COPY --from=builder /app/builds/ip-location-api-linux-arm64.bin /app/ip-location-api
