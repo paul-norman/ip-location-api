@@ -15,13 +15,26 @@ all: test build
 # Build commands
 build: update $(BUILD_COMMAND)
 
-build_other:
+build_linux_amd64:
 	GOARCH=amd64 GOOS=linux go build -o builds/$(BINARY_NAME)-linux-x64.bin .
+
+build_windows_amd64:
 	GOARCH=amd64 GOOS=windows go build -o builds/$(BINARY_NAME)-windows-x64.exe .
+
+build_darwin_amd64:
 	GOARCH=amd64 GOOS=darwin go build -o builds/$(BINARY_NAME)-darwin-x64.dmg .
+
+build_linux_arm64:
 	GOARCH=arm64 GOOS=linux go build -o builds/$(BINARY_NAME)-linux-arm64.bin .
+
+build_windows_arm64:
 	GOARCH=arm64 GOOS=windows go build -o builds/$(BINARY_NAME)-windows-arm64.exe .
+
+build_darwin_arm64:
 	GOARCH=arm64 GOOS=darwin go build -o builds/$(BINARY_NAME)-darwin-arm64.dmg .
+
+build_other: build_linux_amd64 build_windows_amd64 build_darwin_amd64
+build_other: build_linux_arm64 build_windows_arm64 build_darwin_arm64
 
 build_windows:
 	set "GOARCH=amd64" && set "GOOS=linux" && go build -o builds\$(BINARY_NAME)-linux-x64.bin .
@@ -38,12 +51,12 @@ clean_go:
 	go clean
 
 clean_other: clean_go
-	rm builds/$(BINARY_NAME)-linux-x64.bin
-	rm builds/$(BINARY_NAME)-windows-x64.exe
-	rm builds/$(BINARY_NAME)-darwin-x64.dmg
-	rm builds/$(BINARY_NAME)-linux-arm64.bin
-	rm builds/$(BINARY_NAME)-windows-arm64.exe
-	rm builds/$(BINARY_NAME)-darwin-arm64.dmg
+	$(RM) builds/$(BINARY_NAME)-linux-x64.bin
+	$(RM) builds/$(BINARY_NAME)-windows-x64.exe
+	$(RM) builds/$(BINARY_NAME)-darwin-x64.dmg
+	$(RM) builds/$(BINARY_NAME)-linux-arm64.bin
+	$(RM) builds/$(BINARY_NAME)-windows-arm64.exe
+	$(RM) builds/$(BINARY_NAME)-darwin-arm64.dmg
 
 clean_windows: clean_go
 	del "builds\$(BINARY_NAME)-linux-x64.bin"
@@ -69,3 +82,7 @@ test: update
 update:
 	go get -u
 	go mod tidy
+
+# Docker commands
+dockerbuild:
+	docker build -t ip-location-api .
