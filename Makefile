@@ -51,12 +51,12 @@ clean_go:
 	go clean
 
 clean_other: clean_go
-	rm builds/$(BINARY_NAME)-linux-x64.bin
-	rm builds/$(BINARY_NAME)-windows-x64.exe
-	rm builds/$(BINARY_NAME)-darwin-x64.dmg
-	rm builds/$(BINARY_NAME)-linux-arm64.bin
-	rm builds/$(BINARY_NAME)-windows-arm64.exe
-	rm builds/$(BINARY_NAME)-darwin-arm64.dmg
+	$(RM) builds/$(BINARY_NAME)-linux-x64.bin
+	$(RM) builds/$(BINARY_NAME)-windows-x64.exe
+	$(RM) builds/$(BINARY_NAME)-darwin-x64.dmg
+	$(RM) builds/$(BINARY_NAME)-linux-arm64.bin
+	$(RM) builds/$(BINARY_NAME)-windows-arm64.exe
+	$(RM) builds/$(BINARY_NAME)-darwin-arm64.dmg
 
 clean_windows: clean_go
 	del "builds\$(BINARY_NAME)-linux-x64.bin"
