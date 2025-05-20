@@ -261,10 +261,27 @@ More interestingly, for a single IP, `/benchmark/{ipVersion}/1`:
 
 **1000μs is still only 0.001 seconds, so all are acceptably quick.**
 
+## Docker
+
+There is a Dockerfile included that supports building a docker container image, `ip-location-api`.
+This can be built by running `make dockerbuild`.
+By default, this uses the `mmdb` data storage, and open data that doesn't require a license:
+
+* `COUNTRY` defaults to `geo-whois-asn-country`
+* `CITY` defaults to blank
+* `ASN` defaults to `asn`
+
+To run the docker image, map port 8080 to the desired port, and pass the configuration variables on the commandline.
+For example, to serve on port 8454, using a sqlite database, with the dbip data for country and ask but geolite2 for city, run:
+
+```Shell
+docker run -p 8454:8080 -e DB_TYPE=sqlite -e DB_USER=ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api
+```
+
 ## Possible Future Improvements / Enhancements
 
 - [ ] Make the webserver optional
-- [ ] Add ready to use Docker examples
+- [x] Add ready to use Docker examples
 - [ ] Return licence info with the API results *(if required)*
 - [ ] Improve my sloppy Go code
 - [ ] Add proper tests
