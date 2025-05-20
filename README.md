@@ -278,6 +278,8 @@ For example, to serve on port 8454, using a sqlite database, with the dbip data 
 docker run -p 8454:8080 -e DB_TYPE=sqlite -e DB_USER=ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api
 ```
 
+To persist location data between starts, pass `-v ip_location_data:/app/downloads` to the `docker run` command.
+
 ## Possible Future Improvements / Enhancements
 
 - [ ] Make the webserver optional
