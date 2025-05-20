@@ -31,6 +31,42 @@ WORKDIR /app
 RUN mkdir -p /app/downloads && \
     chown -R appuser:appuser /app
 
+# Create the entrypoint script that will generate .env
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo 'echo "SERVER_HOST=$SERVER_HOST" > /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "SERVER_PORT=$SERVER_PORT" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "API_KEY=$API_KEY" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "COUNTRY=$COUNTRY" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "CITY=$CITY" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "ASN=$ASN" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "UPDATE_TIME=$UPDATE_TIME" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "DB_TYPE=$DB_TYPE" >> /app/.env' >> /app/entrypoint.sh && \
+    echo '' >> /app/entrypoint.sh && \
+    echo '# Add database variables if they are set' >> /app/entrypoint.sh && \
+    echo 'if [ ! -z "$DB_HOST" ]; then' >> /app/entrypoint.sh && \
+    echo '  echo "DB_HOST=$DB_HOST" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
+    echo 'if [ ! -z "$DB_PORT" ]; then' >> /app/entrypoint.sh && \
+    echo '  echo "DB_PORT=$DB_PORT" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
+    echo 'if [ ! -z "$DB_USER" ]; then' >> /app/entrypoint.sh && \
+    echo '  echo "DB_USER=$DB_USER" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
+    echo 'if [ ! -z "$DB_PASS" ]; then' >> /app/entrypoint.sh && \
+    echo '  echo "DB_PASS=$DB_PASS" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
+    echo 'if [ ! -z "$DB_NAME" ]; then' >> /app/entrypoint.sh && \
+    echo '  echo "DB_NAME=$DB_NAME" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
+    echo 'if [ ! -z "$DB_SCHEMA" ]; then' >> /app/entrypoint.sh && \
+    echo '  echo "DB_SCHEMA=$DB_SCHEMA" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
+    echo '' >> /app/entrypoint.sh && \
+    echo '# Start the application' >> /app/entrypoint.sh && \
+    echo 'exec /app/ip-location-api' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh && \
+    chown appuser:appuser /app/entrypoint.sh
+
 USER appuser
 
 # Create separate stages for each architecture
@@ -65,6 +101,6 @@ ENV DB_TYPE="mmdb"
 # ENV DB_NAME=""
 # ENV DB_SCHEMA="" # used for postgres/sqlite
 
-# Command to run the application
-CMD ["/app/ip-location-api"]
 
+# Command to run the entrypoint script that will generate .env and start the app
+CMD ["/app/entrypoint.sh"]
