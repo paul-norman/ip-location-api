@@ -87,6 +87,8 @@ If you wish to expose the system without a reverse proxy, you may wish to update
 
 `API_KEY` allows a very basic protection of the system to be applied, a header named `API-KEY` *(hyphen not underscore!)* with a matching value must be passed if this variable is populated. If left blank, the API is open.
 
+`LOAD_LOG_FREQ` allows adjusting how frequently progress in saving records will be logged.
+
 `COUNTRY`, `CITY` and `ASN` are the databases that will be loaded. **If you don't need cities or ASNs, just leave them blank.** The values / names used should mirror the directory values found in the [ip-location-db](https://github.com/sapics/ip-location-db) project:
 
 ### Allowed `COUNTRY` values

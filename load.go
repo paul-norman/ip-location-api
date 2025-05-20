@@ -56,6 +56,14 @@ func loadCities(dataToLoad DataToLoad) {
 	version := dbQueryMaxVersion("ip_city", dataToLoad.Version) + 1
 	cities	:= []IpCity{}
 	count	:= 0;
+	lastLog	:= 0;
+	logFS	:= os.Getenv("LOAD_LOG_FREQ")
+	logFreq, err	:= strconv.Atoi(logFS)
+	if err != nil {
+		logFreq	= 100;
+	}
+
+
 
 	fmt.Println("rebuilding: ip_city ipv", dataToLoad.Version)
 	fmt.Print("\033[s") // Save the cursor position
@@ -71,8 +79,11 @@ func loadCities(dataToLoad DataToLoad) {
 
 		if len(cities) == 100 {
 			count += len(cities);
-			fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
-			fmt.Printf("Saved: %d entries\n", count)
+			if (count >= lastLog + logFreq) {
+				fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
+				fmt.Printf("Saved: %d entries\n", count)
+				lastLog = count
+			}
 			dbSaveCities(cities)
 			cities = []IpCity{}
 		}
@@ -99,6 +110,12 @@ func loadASNs(dataToLoad DataToLoad) {
 	version := dbQueryMaxVersion("ip_asn", dataToLoad.Version) + 1
 	ASNs	:= []IpASN{}
 	count	:= 0;
+	lastLog	:= 0;
+	logFS	:= os.Getenv("LOAD_LOG_FREQ")
+	logFreq, err	:= strconv.Atoi(logFS)
+	if err != nil {
+		logFreq	= 100;
+	}
 
 	fmt.Println("rebuilding: ip_asn ipv", dataToLoad.Version)
 	fmt.Print("\033[s") // Save the cursor position
@@ -112,8 +129,11 @@ func loadASNs(dataToLoad DataToLoad) {
 
 		if len(ASNs) == 100 {
 			count += len(ASNs);
-			fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
-			fmt.Printf("Saved: %d entries\n", count)
+			if (count >= lastLog + logFreq) {
+				fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
+				fmt.Printf("Saved: %d entries\n", count)
+				lastLog = count
+			}
 			dbSaveASNs(ASNs)
 			ASNs = []IpASN{}
 		}
@@ -140,6 +160,12 @@ func loadCountries(dataToLoad DataToLoad) {
 	version		:= dbQueryMaxVersion("ip_country", dataToLoad.Version) + 1
 	countries	:= []IpCountry{}
 	count		:= 0;
+	lastLog	:= 0;
+	logFS	:= os.Getenv("LOAD_LOG_FREQ")
+	logFreq, err	:= strconv.Atoi(logFS)
+	if err != nil {
+		logFreq	= 100;
+	}
 
 	fmt.Println("rebuilding: ip_country ipv", dataToLoad.Version)
 	fmt.Print("\033[s") // Save the cursor position
@@ -152,8 +178,11 @@ func loadCountries(dataToLoad DataToLoad) {
 
 		if len(countries) == 100 {
 			count += len(countries);
-			fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
-			fmt.Printf("Saved: %d entries\n", count)
+			if (count >= lastLog + logFreq) {
+				fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
+				fmt.Printf("Saved: %d entries\n", count)
+				lastLog = count
+			}
 			dbSaveCountries(countries)
 			countries = []IpCountry{}
 		}

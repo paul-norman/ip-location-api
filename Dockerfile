@@ -40,6 +40,7 @@ RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
     echo 'echo "CITY=$CITY" >> /app/.env' >> /app/entrypoint.sh && \
     echo 'echo "ASN=$ASN" >> /app/.env' >> /app/entrypoint.sh && \
     echo 'echo "UPDATE_TIME=$UPDATE_TIME" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'echo "LOAD_LOG_FREQ=$LOAD_LOG_FREQ" >> /app/.env' >> /app/entrypoint.sh && \
     echo 'echo "DB_TYPE=$DB_TYPE" >> /app/.env' >> /app/entrypoint.sh && \
     echo '' >> /app/entrypoint.sh && \
     echo '# Add database variables if they are set' >> /app/entrypoint.sh && \
@@ -94,6 +95,7 @@ ENV COUNTRY="geo-whois-asn-country"
 ENV CITY=""
 ENV ASN="asn"
 ENV UPDATE_TIME="01:30"
+ENV LOAD_LOG_FREQ=50000
 # DB_TYPE can be mmdb, postgres, mysql, sqlite or :memory:
 ENV DB_TYPE="mmdb"
 # Database connection variables (used when DB_TYPE is set to postgres/mysql/sqlite)
