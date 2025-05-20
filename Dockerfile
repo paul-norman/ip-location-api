@@ -14,12 +14,11 @@ RUN go mod download
 # Copy the rest of the source code
 COPY . .
 
-# Build the application using the Makefile
-# Default to linux/arm64 for the container
-RUN make build_linux_arm64
+# Build for both architectures to support different platforms
+RUN make build_linux_amd64 && make build_linux_arm64
 
 # Create a minimal runtime image
-FROM alpine:3.19
+FROM --platform=$TARGETPLATFORM alpine:3.19 AS runtime
 
 # Install CA certificates for HTTPS requests
 RUN apk add --no-cache ca-certificates tzdata
@@ -34,8 +33,15 @@ RUN mkdir -p /app/downloads && \
 
 USER appuser
 
-# Copy the binary from the builder stage
+# Create separate stages for each architecture
+FROM runtime AS amd64
+COPY --from=builder /app/builds/ip-location-api-linux-amd64.bin /app/ip-location-api
+
+FROM runtime AS arm64
 COPY --from=builder /app/builds/ip-location-api-linux-arm64.bin /app/ip-location-api
+
+# Use the appropriate image based on architecture
+FROM ${TARGETARCH}
 
 # Expose the server port (will be overridden by SERVER_PORT env var if set)
 EXPOSE 8080
