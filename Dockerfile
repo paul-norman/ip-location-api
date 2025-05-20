@@ -79,6 +79,9 @@ COPY --from=builder /app/builds/ip-location-api-linux-arm64.bin /app/ip-location
 # Use the appropriate image based on architecture
 FROM ${TARGETARCH}
 
+# Declare a volume for persisting downloaded data
+VOLUME /app/downloads
+
 # Expose the server port (will be overridden by SERVER_PORT env var if set)
 EXPOSE 8080
 
