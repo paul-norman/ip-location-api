@@ -112,7 +112,7 @@ func downloadFile(filePath string, url string) (bool, error) {
 	fmt.Println("downloading Etag: " + url)
 	newEtag := getEtag(url)
 
-	if newEtag != "" && currentEtag != newEtag {
+	if newEtag == "" || currentEtag != newEtag {
 		fileWriteSmall(etagFilePath, newEtag)
 
 		fmt.Println("downloading data file: " + url)
