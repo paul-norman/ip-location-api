@@ -169,14 +169,10 @@ func mmdbSaveRestart(table string, ipVersion int) {
 		if err != nil {
 			panic(err)
 		}
+		defer fileHandle.Close()
 
 		fmt.Println("Writing MMDB file: " + filePath)
 		_, err = mmDbWriter.WriteTo(fileHandle)
-		if err != nil {
-			panic(err)
-		}
-
-		err = fileHandle.Close()
 		if err != nil {
 			panic(err)
 		}

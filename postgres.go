@@ -76,7 +76,8 @@ func postgresIp(ip net.IP) *Ip {
 						
 			FROM		"%s"."ip_city"
 			 
-			WHERE		"ip_range_start" <= $1 
+			WHERE		"ip_range_start"	<= $1 
+			AND			"ip_range_end"		>= $1
 
 			ORDER BY	"ip_range_start" DESC
 			 
@@ -105,7 +106,8 @@ func postgresIp(ip net.IP) *Ip {
 							
 				FROM		"%s"."ip_country"
 				 
-				WHERE		"ip_range_start" <= $1 
+				WHERE		"ip_range_start"	<= $1
+				AND			"ip_range_end"		>= $1
 				
 				ORDER BY	"ip_range_start" DESC
 					 
@@ -133,7 +135,8 @@ func postgresIp(ip net.IP) *Ip {
 						
 			FROM		"%s"."ip_asn"
 			 
-			WHERE		"ip_range_start" <= $1 
+			WHERE		"ip_range_start"	<= $1
+			AND			"ip_range_end"		>= $1
 			
 			ORDER BY	"ip_range_start" DESC
 			 
