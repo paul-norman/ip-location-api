@@ -22,19 +22,19 @@ import (
 func decompressFile(filePath string, compression string) error {
 	reader, err := os.Open(filePath)
 	if err != nil {
-	   panic(err)
+		panic(err)
 	}
 	defer reader.Close()
 
 	uncompressedStream, err := gzip.NewReader(reader)
 	if err != nil {
-	   panic(err)
+		panic(err)
 	}
 
 	decompressedFilePath := strings.Replace(filePath, compression, "", -1)
 	decompressedFile, err := os.Create(decompressedFilePath)
 	if err != nil {
-	   panic(err)
+		panic(err)
 	}
 	defer decompressedFile.Close()
 
@@ -207,6 +207,20 @@ func getIpVersion(ipString string) int {
 	}
 
 	return ipVersion
+}
+
+func getLogFrequency() int {
+	loadLogFrequency := os.Getenv("LOAD_LOG_FREQ")
+	if len(loadLogFrequency) > 0 {
+		loadLogFrequencyInt, err := strconv.Atoi(loadLogFrequency)
+		if err != nil {
+			panic(err)
+		}
+
+		return loadLogFrequencyInt
+	}
+
+	return 1000
 }
 
 func hasASNDatabase() bool {
