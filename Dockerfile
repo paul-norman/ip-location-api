@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build for both architectures to support different platforms
-RUN make build_linux_amd64 && make build_linux_arm64
+RUN make build_linux
 
 # Create a minimal runtime image
 FROM --platform=$TARGETPLATFORM alpine:3.19 AS runtime
@@ -105,7 +105,6 @@ ENV DB_TYPE="mmdb"
 # ENV DB_PASS=""
 # ENV DB_NAME=""
 # ENV DB_SCHEMA="" # used for postgres/sqlite
-
 
 # Command to run the entrypoint script that will generate .env and start the app
 CMD ["/app/entrypoint.sh"]

@@ -87,8 +87,6 @@ If you wish to expose the system without a reverse proxy, you may wish to update
 
 `API_KEY` allows a very basic protection of the system to be applied, a header named `API-KEY` *(hyphen not underscore!)* with a matching value must be passed if this variable is populated. If left blank, the API is open.
 
-`LOAD_LOG_FREQ` allows adjusting how frequently progress in saving records will be logged.
-
 `COUNTRY`, `CITY` and `ASN` are the databases that will be loaded. **If you don't need cities or ASNs, just leave them blank.** The values / names used should mirror the directory values found in the [ip-location-db](https://github.com/sapics/ip-location-db) project:
 
 ### Allowed `COUNTRY` values
@@ -114,6 +112,8 @@ If you wish to expose the system without a reverse proxy, you may wish to update
 - geolite2-city
 
 `UPDATE_TIME` is optional, but if present *(and in standard HH:MM format)*, it will check for / download / reload new data every 24 hours at the time specified.
+
+`LOAD_LOG_FREQ` is optional, but if present allows adjusting how frequently load progress is logged. Defaults to 1000.
 
 ### MMDB
 
@@ -263,24 +263,50 @@ More interestingly, for a single IP, `/benchmark/{ipVersion}/1`:
 
 **1000μs is still only 0.001 seconds, so all are acceptably quick.**
 
+## Building
+
+The tool can be built for all architectures using the command:
+
+```Shell
+make build
+```
+
+Or specific platforms using more specific commands:
+
+```Shell
+make build_linux
+make build_darwin
+make build_windows
+```
+
+Or specific platforms and architectures using even more specific commands:
+
+```Shell
+make build_linux_x64
+make build_linux_arm64
+make build_darwin_x64
+make build_darwin_arm64
+make build_windows_x64
+make build_windows_arm64
+```
+
 ## Docker
 
-There is a Dockerfile included that supports building a docker container image, `ip-location-api`.
-This can be built by running `make dockerbuild`.
-By default, this uses the `mmdb` data storage, and open data that doesn't require a license:
+There is a Dockerfile included that supports building a docker container image, `ip-location-api`. This can be built by running `make dockerbuild`. By default, this uses the `mmdb` data storage, and open data that doesn't require a licence:
 
 * `COUNTRY` defaults to `geo-whois-asn-country`
 * `CITY` defaults to blank
 * `ASN` defaults to `asn`
 
-To run the docker image, map port 8080 to the desired port, and pass the configuration variables on the commandline.
-For example, to serve on port 8454, using a sqlite database, with the dbip data for country and ask but geolite2 for city, run:
+To run the docker image, map port 8080 to the desired port, and pass in any configuration variables. For example, to serve on port 8454, using an SQLite database, with the `dbip` data for country and ASN, but `geolite2` for city, run:
 
 ```Shell
 docker run -p 8454:8080 -e DB_TYPE=sqlite -e DB_USER=ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api
 ```
 
-To persist location data between starts, pass `-v ip_location_data:/app/downloads` to the `docker run` command.
+To persist location data, pass `-v ip_location_data:/app/downloads` to the `docker run` command, for example:
+
+docker run -p 8454:8080 -e DB_TYPE=sqlite -e DB_USER=ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api -v ip_location_data:/app/downloads
 
 ## Possible Future Improvements / Enhancements
 
