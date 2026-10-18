@@ -95,7 +95,7 @@ type MmdbCity struct {
 		Names		struct {
 			Value	string 		`maxminddb:"en"`
 		}						`maxminddb:"names"`
-	}							`maxminddb:"continent"`
+	}							`maxminddb:"country"`
 	Continent		struct {
 		Code		string		`maxminddb:"code"`
 		GeonameID	int64		`maxminddb:"geoname_id"`

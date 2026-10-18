@@ -39,67 +39,32 @@ func decompressFile(filePath string, compression string) error {
 	defer decompressedFile.Close()
 
 	fmt.Println("decompressing: " + filePath)
-	buf := make([]byte, 1024)
-	for {
-		_, readErr := uncompressedStream.Read(buf)
-		if readErr != nil && !errors.Is(readErr, io.EOF) {
-			panic(readErr)
-		}
-
-		_, writeErr := decompressedFile.Write(buf)
-		if writeErr != nil {
-			panic(writeErr);
-		}
-
-		if errors.Is(readErr, io.EOF) {
-			break
-		}
-	}
+	_, err = io.Copy(decompressedFile, uncompressedStream)
 
 	return err
 }
 
 func durationUntil(timeUntil string) time.Duration {
 	updateTime	:= strings.Split(timeUntil, ":")
-	hours, _	:= strconv.Atoi(updateTime[0])
-	minutes, _	:= strconv.Atoi(updateTime[1])
-
-	nsNow		:= time.Now().Nanosecond()
-	secondsNow	:= time.Now().Second()
-	minutesNow	:= time.Now().Minute()
-	hoursNow	:= time.Now().Hour()
-
-	adjNanoseconds := 0
-	if nsNow > 0 {
-		adjNanoseconds = 1000000000 - nsNow
-		secondsNow++
+	if len(updateTime) < 2 {
+		panic("invalid time (expected HH:MM): " + timeUntil)
 	}
-
-	adjSeconds := 0
-	if secondsNow > 0 {
-		adjSeconds = 60 - secondsNow
-		minutesNow++
-	}
-
-	adjMinutes := 60 - (minutesNow - minutes)
-	if minutesNow > minutes {
-		hoursNow++
-	}
-
-	adjHours := 0
-	if hoursNow >= hours {
-		adjHours = hoursNow - hours
-	} else {
-		adjHours = 24 - (hoursNow - hours)
-		//daysNow++
-	}
-
-	duration, err := time.ParseDuration(fmt.Sprintf("%dh%dm%ds%dns", adjHours, adjMinutes, adjSeconds, adjNanoseconds))
+	hours, err	:= strconv.Atoi(updateTime[0])
 	if err != nil {
-		panic(err);
+		panic(err)
+	}
+	minutes, err	:= strconv.Atoi(updateTime[1])
+	if err != nil {
+		panic(err)
 	}
 
-	return duration
+	now		:= time.Now()
+	next	:= time.Date(now.Year(), now.Month(), now.Day(), hours, minutes, 0, 0, now.Location())
+	if !next.After(now) {
+		next = next.AddDate(0, 0, 1)
+	}
+
+	return next.Sub(now)
 }
 
 func fetchIP(ipString string) (*Ip, error) {
@@ -192,12 +157,11 @@ func getEtag(url string) string {
 	}
 	defer resp.Body.Close()
 
-	etag, ok := resp.Header["Etag"]
-	if ok {
-		return etag[0];
+	if resp.StatusCode != http.StatusOK {
+		return ""
 	}
 
-	return ""
+	return resp.Header.Get("ETag")
 }
 
 func getIpVersion(ipString string) int {
@@ -253,11 +217,9 @@ func ipv6ToNumber(ipString string) string {
 	if err == nil && ipVersion == 16 {
 		arr, err := ipconv.IPv6ToInt(ip)
 		if err == nil {
-			bigInt := big.NewInt(0)
-			for _, val := range arr {
-				newNigInt := new(big.Int).SetUint64(val)
-				bigInt.Add(bigInt, newNigInt)
-			}
+			bigInt := new(big.Int).SetUint64(arr[0])
+			bigInt.Lsh(bigInt, 64)
+			bigInt.Or(bigInt, new(big.Int).SetUint64(arr[1]))
 			return bigInt.String()
 		}
 		panic(err)
@@ -291,7 +253,7 @@ func isIpv4Reserved(ip string) bool {
 }
 
 func randomIpv4() string {
-	numbers := []int{ randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255) }
+	numbers := []int{ randomNumber(0, 256), randomNumber(0, 256), randomNumber(0, 256), randomNumber(0, 256) }
 	var parts []string
 	for _, number := range numbers {
 		parts = append(parts, strconv.Itoa(number))
@@ -311,7 +273,7 @@ func randomIpv6() string {
 
 	first := []string{ "2001", "2002", "2003", "2400", "2401", "2402", "2403", "2404", "2405", "2406", "2407", "2408",
 	"2409", "240a", "2600", "2601", "2602", "2603", "2604", "2605", "2606", "2607", "2608", "2609", "2610", "2620",
-	"2800", "2801", "2802", "2803", "2804", "2806", "2a00", "2a01", "2a2", "2a03", "2a04", "2a05", "2a06", "2a07",
+	"2800", "2801", "2802", "2803", "2804", "2806", "2a00", "2a01", "2a02", "2a03", "2a04", "2a05", "2a06", "2a07",
 	"2a08", "2a09", "2a0a", "2a0b", "2a0c", "2a0d", "2a0e", "2a0f", "2a10", "2a11", "2a12", "2a13", "2a14", "2c0e",
 	"2c0f" }
 	pick := randomNumber(0, len(first))
@@ -320,7 +282,7 @@ func randomIpv6() string {
 
 	// Not strictly accurate, but good enough
 	for i := 0; i < 7; i++ {
-		parts = append(parts, fmt.Sprintf("%02x", randomNumber(0, 255)) + fmt.Sprintf("%02x", randomNumber(0, 255)))
+		parts = append(parts, fmt.Sprintf("%04x", randomNumber(0, 65536)))
 	}
 
 	return strings.Join(parts, ":")

@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/oschwald/maxminddb-golang"
 	"github.com/maxmind/mmdbwriter"
@@ -13,6 +14,7 @@ import (
 )
 
 var mmDb = map[string]*maxminddb.Reader{}
+var mmDbLock sync.RWMutex
 var mmDbWriter *mmdbwriter.Tree
 
 func mmdbConnect() {
@@ -22,6 +24,9 @@ func mmdbConnect() {
 }
 
 func mmdbClose() {
+	mmDbLock.Lock()
+	defer mmDbLock.Unlock()
+
 	for connectionId, conn := range mmDb {
 		err := conn.Close()
 		if err != nil {
@@ -33,12 +38,18 @@ func mmdbClose() {
 
 func mmdbInitialised(key string) bool {
 	connectionId := key + "ipv4"
+
+	mmDbLock.RLock()
 	_, ok := mmDb[connectionId]
+	mmDbLock.RUnlock()
 
 	return ok
 }
 
 func mmdbOpenFile(key string) {
+	mmDbLock.Lock()
+	defer mmDbLock.Unlock()
+
 	if len(os.Getenv(key)) > 0 {
 		ipVersions := []int{ 4, 6 }
 		for _, ipVersion := range ipVersions {
@@ -62,6 +73,9 @@ func mmdbOpenFile(key string) {
 }
 
 func mmdbCloseFile(connectionId string, filePath string) {
+	mmDbLock.Lock()
+	defer mmDbLock.Unlock()
+
 	conn, ok := mmDb[connectionId]
 	if ok {
 		fmt.Println("Closing MMDB file: " + filePath)
@@ -82,6 +96,9 @@ func mmdbIp(ip net.IP) *Ip {
 
 	ipStruct := NewIp(ipString, ipVersion)
 
+	mmDbLock.RLock()
+	defer mmDbLock.RUnlock()
+
 	if hasCityDatabase() {
 		connectionId := "CITYipv" + strconv.Itoa(ipVersion)
 		_, ok := mmDb[connectionId]
@@ -94,6 +111,8 @@ func mmdbIp(ip net.IP) *Ip {
 
 			if len(mmdbCity.City.Names.Value) > 0 {
 				ipStruct.City		= mmdbCity.City.Names.Value
+				ipStruct.Postcode	= mmdbCity.City.Postcode
+				ipStruct.Timezone	= mmdbCity.City.Timezone
 				ipStruct.Latitude	= mmdbCity.Location.Latitude
 				ipStruct.Longitude	= mmdbCity.Location.Longitude
 				ipStruct.FoundCity	= true

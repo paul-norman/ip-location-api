@@ -1,5 +1,5 @@
 # Use a multi-stage build for a smaller final image
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache make git
@@ -15,7 +15,8 @@ RUN go mod download
 COPY . .
 
 # Build for both architectures to support different platforms
-RUN make build_linux
+# (calls the build targets directly so `go get -u` doesn't alter dependencies mid-build)
+RUN make build_on_unix_linux_x64 build_on_unix_linux_arm64
 
 # Create a minimal runtime image
 FROM --platform=$TARGETPLATFORM alpine:3.19 AS runtime
@@ -59,6 +60,9 @@ RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
     echo 'if [ ! -z "$DB_NAME" ]; then' >> /app/entrypoint.sh && \
     echo '  echo "DB_NAME=$DB_NAME" >> /app/.env' >> /app/entrypoint.sh && \
     echo 'fi' >> /app/entrypoint.sh && \
+    echo 'if [ ! -z "$DB_FILE" ]; then' >> /app/entrypoint.sh && \
+    echo '  echo "DB_FILE=$DB_FILE" >> /app/.env' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
     echo 'if [ ! -z "$DB_SCHEMA" ]; then' >> /app/entrypoint.sh && \
     echo '  echo "DB_SCHEMA=$DB_SCHEMA" >> /app/.env' >> /app/entrypoint.sh && \
     echo 'fi' >> /app/entrypoint.sh && \
@@ -96,12 +100,13 @@ ENV CITY=""
 ENV ASN="asn"
 ENV UPDATE_TIME="01:30"
 ENV LOAD_LOG_FREQ=50000
-# DB_TYPE can be mmdb, postgres, mysql, sqlite or :memory:
+# DB_TYPE can be mmdb, postgres, mysql or sqlite
 ENV DB_TYPE="mmdb"
 # Database connection variables (used when DB_TYPE is set to postgres/mysql/sqlite)
 # ENV DB_HOST=""
 # ENV DB_PORT=""
-# ENV DB_USER="" # used with sqlite for .db filename
+# ENV DB_USER=""
+# ENV DB_FILE="" # used with sqlite for .db filename
 # ENV DB_PASS=""
 # ENV DB_NAME=""
 # ENV DB_SCHEMA="" # used for postgres/sqlite

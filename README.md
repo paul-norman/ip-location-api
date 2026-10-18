@@ -156,15 +156,15 @@ DB_NAME=ip
 
 **SQLite currently DOES NOT work with IPv6 because it lacks a datatype which can easily compare numbers of the required size.** I don't personally ever use SQLite, so when I realised that it had no support for larger numeric fields I didn't push any further. If anyone would like to fix this, it would be gratefully received! 
 
-The SQLite adaption will create 6 tables *(ipv4 and ipv6 are separated)* *(`ipv4_country`, `ipv6_country_ipv6`, `ipv4_asn`, `ipv6_asn`, `ipv4_city` and `ipv6_city`)* in a database of your choice:
+The SQLite adaption will create 6 tables *(ipv4 and ipv6 are separated)* *(`ipv4_country`, `ipv6_country`, `ipv4_asn`, `ipv6_asn`, `ipv4_city` and `ipv6_city`)* in a database of your choice:
 
 ```Dotenv
 DB_TYPE=sqlite
-DB_USER=path/to/db.db
+DB_FILE=path/to/db.db
 DB_SCHEMA=
 ```
 
-Since schemas are supported by SQLite, their use is optional. `DB_TYPE` may also be set to `:memory:`.
+Since schemas are supported by SQLite, their use is optional. `DB_FILE` may also be set to `:memory:`.
 
 ## Install as a service
 
@@ -301,12 +301,14 @@ There is a Dockerfile included that supports building a docker container image, 
 To run the docker image, map port 8080 to the desired port, and pass in any configuration variables. For example, to serve on port 8454, using an SQLite database, with the `dbip` data for country and ASN, but `geolite2` for city, run:
 
 ```Shell
-docker run -p 8454:8080 -e DB_TYPE=sqlite -e DB_USER=ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api
+docker run -p 8454:8080 -e DB_TYPE=sqlite -e DB_FILE=downloads/ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api
 ```
 
 To persist location data, pass `-v ip_location_data:/app/downloads` to the `docker run` command, for example:
 
-docker run -p 8454:8080 -e DB_TYPE=sqlite -e DB_USER=ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api -v ip_location_data:/app/downloads
+```Shell
+docker run -p 8454:8080 -v ip_location_data:/app/downloads -e DB_TYPE=sqlite -e DB_FILE=downloads/ip-location-api.db -e COUNTRY=dbip-country -e CITY=geolite2-city -e ASN=dbip-asn ip-location-api
+```
 
 ## Possible Future Improvements / Enhancements
 

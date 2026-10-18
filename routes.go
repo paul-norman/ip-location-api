@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,16 +14,14 @@ func getHome(response http.ResponseWriter, request *http.Request) {
 
 func getIp(response http.ResponseWriter, request *http.Request) {
 	if !validApiKey(request, false) {
-		response.Header().Set("Content-Type", "application/json")
-		response.Write([]byte(`{ "error": "Sorry, this API requires a key" }`))
+		writeError(response, "Sorry, this API requires a key")
 		return
 	}
 
 	ipString := request.PathValue("ip")
 	jsonBytes, err := fetchIPJson(ipString)
 	if err != nil {
-		response.Header().Set("Content-Type", "application/json")
-		response.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+		writeError(response, err.Error())
 		return
 	}
 
@@ -32,8 +31,7 @@ func getIp(response http.ResponseWriter, request *http.Request) {
 
 func getRandomIp(response http.ResponseWriter, request *http.Request) {
 	if !validApiKey(request, true) {
-		response.Header().Set("Content-Type", "application/json")
-		response.Write([]byte(`{ "error": "Sorry, this API requires a key" }`))
+		writeError(response, "Sorry, this API requires a key")
 		return
 	}
 
@@ -47,8 +45,7 @@ func getRandomIp(response http.ResponseWriter, request *http.Request) {
 
 	jsonBytes, err := fetchIPJson(ipString)
 	if err != nil {
-		response.Header().Set("Content-Type", "application/json")
-		response.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+		writeError(response, err.Error())
 		return
 	}
 
@@ -58,8 +55,7 @@ func getRandomIp(response http.ResponseWriter, request *http.Request) {
 
 func getBenchmark(response http.ResponseWriter, request *http.Request) {
 	if !validApiKey(request, true) {
-		response.Header().Set("Content-Type", "application/json")
-		response.Write([]byte(`{ "error": "Sorry, this API requires a key" }`))
+		writeError(response, "Sorry, this API requires a key")
 		return
 	}
 
@@ -69,9 +65,8 @@ func getBenchmark(response http.ResponseWriter, request *http.Request) {
 	times		:= request.PathValue("times")
 
 	timesInt, err := strconv.Atoi(times)
-	if err != nil {
-		response.Header().Set("Content-Type", "application/json")
-		response.Write([]byte(`{ "error": "URL must contain a numeric number of times to run" }`))
+	if err != nil || timesInt < 1 {
+		writeError(response, "URL must contain a positive numeric number of times to run")
 		return
 	}
 
@@ -91,8 +86,7 @@ func getBenchmark(response http.ResponseWriter, request *http.Request) {
 	for _, ipString := range testIps {
 		_, err := fetchIP(ipString)
 		if err != nil {
-			response.Header().Set("Content-Type", "application/json")
-			response.Write([]byte(`{ "error": "Error encountered during run (` + ipString + `)" }`))
+			writeError(response, "Error encountered during run (" + ipString + ")")
 			return
 		}
 	}
@@ -111,4 +105,11 @@ func getBenchmark(response http.ResponseWriter, request *http.Request) {
 		"ms_per_op": `	+ strconv.Itoa(msPerOp) + `, 
 		"μs_per_op": `	+ strconv.Itoa(usPerOp) + ` 
 	}`))
+}
+
+func writeError(response http.ResponseWriter, message string) {
+	jsonBytes, _ := json.Marshal(map[string]string{ "error": message })
+
+	response.Header().Set("Content-Type", "application/json")
+	response.Write(jsonBytes)
 }

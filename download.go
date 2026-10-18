@@ -113,14 +113,16 @@ func downloadFile(filePath string, url string) (bool, error) {
 	newEtag := getEtag(url)
 
 	if newEtag == "" || currentEtag != newEtag {
-		fileWriteSmall(etagFilePath, newEtag)
-
 		fmt.Println("downloading data file: " + url)
 		resp, err := http.Get(url)
 		if err != nil {
 			return false, err
 		}
 		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return false, fmt.Errorf("unexpected status downloading %s: %s", url, resp.Status)
+		}
 
 		out, err := os.Create(filePath)
 		if err != nil {
@@ -129,8 +131,14 @@ func downloadFile(filePath string, url string) (bool, error) {
 		defer out.Close()
 
 		_, err = io.Copy(out, resp.Body)
+		if err != nil {
+			return false, err
+		}
 
-		return true, err
+		// Only record the Etag once the file has been fully downloaded
+		fileWriteSmall(etagFilePath, newEtag)
+
+		return true, nil
 	} else {
 		fmt.Println("Etag unchanged, skipping")
 	}

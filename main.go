@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
-var processing = false
+var processing atomic.Bool
 
 func main() {
 	err := godotenv.Load()
@@ -45,6 +46,7 @@ func initialise() {
 
 	if !initialised {
 		fmt.Println("initialising data source(s)...")
+		processing.Store(true)
 		go upgrade(missing)
 	}
 
@@ -71,16 +73,14 @@ func initialise() {
 }
 
 func upgrade(missing []string) {
-	processing = true;
+	defer processing.Store(false)
 
 	dataToLoad := downloadDataToLoad(missing)
 	loadData(dataToLoad)
-
-	processing = false;
 }
 
 func update(checker *time.Ticker) {
-	if !processing {
+	if processing.CompareAndSwap(false, true) {
 		fmt.Println("checking for updates...")
 		go upgrade([]string{})
 

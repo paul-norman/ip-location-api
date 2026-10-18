@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 )
@@ -61,8 +63,11 @@ func loadCities(dataToLoad DataToLoad) {
 	fmt.Print("\033[s") // Save the cursor position
 	for {
 		record, err := csvFileReader.Read()
-		if err != nil {
+		if errors.Is(err, io.EOF) {
 			break
+		}
+		if err != nil {
+			panic(err)
 		}
 		lat, _ := strconv.ParseFloat(record[7], 64)
 		lon, _ := strconv.ParseFloat(record[8], 64)
@@ -78,8 +83,9 @@ func loadCities(dataToLoad DataToLoad) {
 
 	if len(cities) > 0 {
 		dbSaveCities(cities)
-		logEntries(&cities)
+		numSaved += len(cities)
 	}
+	logEntries(numSaved)
 
 	dbDropOld("ip_city", dataToLoad.Version, version)
 }
@@ -100,8 +106,11 @@ func loadASNs(dataToLoad DataToLoad) {
 	fmt.Print("\033[s") // Save the cursor position
 	for {
 		record, err := csvFileReader.Read()
-		if err != nil {
+		if errors.Is(err, io.EOF) {
 			break
+		}
+		if err != nil {
+			panic(err)
 		}
 		asn, _ := strconv.Atoi(record[2])
 		ASNs = append(ASNs, IpASN{ record[0], record[1], asn, record[3], dataToLoad.Version, version })
@@ -115,8 +124,9 @@ func loadASNs(dataToLoad DataToLoad) {
 
 	if len(ASNs) > 0 {
 		dbSaveASNs(ASNs)
-		logEntries(&ASNs)
+		numSaved += len(ASNs)
 	}
+	logEntries(numSaved)
 
 	dbDropOld("ip_asn", dataToLoad.Version, version)
 }
@@ -137,8 +147,11 @@ func loadCountries(dataToLoad DataToLoad) {
 	fmt.Print("\033[s") // Save the cursor position
 	for {
 		record, err := csvFileReader.Read()
-		if err != nil {
+		if errors.Is(err, io.EOF) {
 			break
+		}
+		if err != nil {
+			panic(err)
 		}
 		countries = append(countries, IpCountry{ record[0], record[1], record[2], dataToLoad.Version, version })
 
@@ -151,8 +164,9 @@ func loadCountries(dataToLoad DataToLoad) {
 
 	if len(countries) > 0 {
 		dbSaveCountries(countries)
-		logEntries(&countries)
+		numSaved += len(countries)
 	}
+	logEntries(numSaved)
 
 	dbDropOld("ip_country", dataToLoad.Version, version)
 }
@@ -161,18 +175,19 @@ func loadDbStructure() {
 	dbFile()
 }
 
-func logEntries[T any](list *[]T) {
+func logEntries(numSaved int) {
 	fmt.Print("\033[u\033[K") // Restore the cursor position and clear the line
-	fmt.Printf("Saved: %d entries\n", len(*list))
+	fmt.Printf("Saved: %d entries\n", numSaved)
 }
 
 // Don't spam the logs, only display every message after `logFreq` records
 func logEntriesConditionally[T any](numSaved *int, list *[]T) {
 	logFreq := getLogFrequency()
 
-	*numSaved += len(*list)
+	previous	:= *numSaved
+	*numSaved	+= len(*list)
 
-	if len(*list) >= *numSaved + logFreq {
-		logEntries(list)
+	if *numSaved / logFreq > previous / logFreq {
+		logEntries(*numSaved)
 	}
 }
